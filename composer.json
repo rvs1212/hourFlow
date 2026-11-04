@@ -1,8 +1,8 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/vue-starter-kit",
+    "name": "rvs1212/hourflow",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "HourFlow is a web-based time tracking and work-hours management application built with Laravel and Vue.js.",
     "keywords": [
         "laravel",
         "framework"
