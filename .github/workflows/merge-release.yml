@@ -1,0 +1,95 @@
+
+name: Promote release
+
+on:
+  release:
+    types: [published]
+
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch to merge into"
+        required: true
+        type: string
+        default: production
+      tag:
+        description: "Published release tag (e.g. v0.1.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: promote-${{ github.event_name == 'release' && 'staging' || inputs.branch }}
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    name: Promote release
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.GHA_APP_ID }}
+          private-key: ${{ secrets.GHA_PRIVATE_KEY }}
+
+      - name: Check out target branch
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event_name == 'release' && 'staging' || inputs.branch }}
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Configure Git identity
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$GITHUB_EVENT_NAME" == "release" ]]; then
+            # Automatic promotion: use GitHub App bot
+            BOT_NAME="${APP_SLUG}[bot]"
+            BOT_ID=$(gh api "/users/$BOT_NAME" --jq '.id')
+
+            git config user.name "$BOT_NAME"
+            git config user.email "${BOT_ID}+${BOT_NAME}@users.noreply.github.com"
+          else
+            # Manual promotion: use the triggering GitHub user
+            git config user.name "$GITHUB_ACTOR"
+            git config user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
+          fi
+
+      - name: Merge published release
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          RELEASE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.tag }}
+          TARGET_BRANCH: ${{ github.event_name == 'release' && 'staging' || inputs.branch }}
+        run: |
+          set -euo pipefail
+
+          # Ensure the tag belongs to a published GitHub Release
+          RELEASE_INFO=$(gh release view "$RELEASE_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --json isDraft,publishedAt)
+
+          if ! echo "$RELEASE_INFO" | jq -e \
+            '.isDraft == false and .publishedAt != null' >/dev/null; then
+            echo "::error::Release $RELEASE_TAG is not published."
+            exit 1
+          fi
+
+          # Fetch the selected release tag
+          git fetch origin "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"
+
+          # Merge the release into the selected branch
+          git merge --no-ff --no-edit "$RELEASE_TAG"
+
+          # Push the updated branch to GitHub
+          git push origin "HEAD:refs/heads/$TARGET_BRANCH"
