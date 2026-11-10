@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.0-rc.2](https://github.com/rvs1212/hourFlow/compare/v0.1.0-rc.1...v0.1.0-rc.2) (2026-11-10)
+
+
+### Miscellaneous Chores
+
+* release 0.1.0-rc.2 ([#4](https://github.com/rvs1212/hourFlow/issues/4)) ([8be23f3](https://github.com/rvs1212/hourFlow/commit/8be23f3b0102efd4ffb790fffb027f087e0f7ec9))
+
 ## 0.1.0-rc.1 (2026-11-05)
 
 
