@@ -1,10 +1,14 @@
 name: tests
 
 on:
+  workflow_call:
+    secrets:
+      CODECOV_TOKEN:
+        required: true
+
   push:
     branches:
       - main
-      - staging
       - production
 
   pull_request:
