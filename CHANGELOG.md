@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.0-rc.3](https://github.com/rvs1212/hourFlow/compare/v0.1.0-rc.2...v0.1.0-rc.3) (2026-11-12)
+
+
+### Miscellaneous Chores
+
+* add GitHub issue and PR templates ([#6](https://github.com/rvs1212/hourFlow/issues/6)) ([1304b01](https://github.com/rvs1212/hourFlow/commit/1304b019a14c54b1e91235407c292a1e9e5716ff))
+* release 0.1.0-rc.3 ([#8](https://github.com/rvs1212/hourFlow/issues/8)) ([84d2702](https://github.com/rvs1212/hourFlow/commit/84d27023c418c27ac5a4ffa0135b3c2755e90553))
+
 ## [0.1.0-rc.2](https://github.com/rvs1212/hourFlow/compare/v0.1.0-rc.1...v0.1.0-rc.2) (2026-11-10)
 
 
